@@ -5,7 +5,15 @@ import CameraLabel from "./camera-button";
 import {Popover, PopoverContent, PopoverTrigger} from "@radix-ui/react-popover";
 import {cn} from "@/lib/utils";
 
-const SPOT_LIST = [
+interface Spot {
+  tag: string;
+  name: string;
+  top: number;
+  left: number;
+  isAvailable: boolean;
+}
+
+const SPOT_LIST: Spot[] = [
   {
     tag: "top",
     name: "정상 휴게소",
@@ -44,10 +52,15 @@ const SPOT_LIST = [
 ];
 
 const Map = () => {
-  const [loading, setLoading] = React.useState(true);
+  const [loadingStates, setLoadingStates] = React.useState(
+    SPOT_LIST.reduce((acc: Record<string, boolean>, spot: Spot) => {
+      acc[spot.tag] = true;
+      return acc;
+    }, {})
+  );
 
-  const handleLoadedData = () => {
-    setLoading(false);
+  const handleLoadedData = (tag: string) => {
+    setLoadingStates(prevState => ({...prevState, [tag]: false}));
   };
 
   return (
@@ -70,7 +83,7 @@ const Map = () => {
           <PopoverContent
             className={cn("flex justify-center items-center z-10 bg-black rounded-2xl p-5 m-2 w-80 h-[200px]")}
           >
-            {loading && (
+            {loadingStates[spot.tag] && (
               <div className="flex justify-center items-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
               </div>
@@ -80,8 +93,8 @@ const Map = () => {
               muted
               autoPlay
               loop
-              onLoadedData={handleLoadedData}
-              style={{display: loading ? "none" : "block"}}
+              onLoadedData={() => handleLoadedData(spot.tag)}
+              style={{display: loadingStates[spot.tag] ? "none" : "block"}}
             />
           </PopoverContent>
         </Popover>
