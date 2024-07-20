@@ -1,7 +1,7 @@
 import Image from "next/image";
+import React from "react";
 import konjiam from "@public/map/map-konjiam.jpg";
 import CameraLabel from "./camera-button";
-import {useState} from "react";
 import {Popover, PopoverContent, PopoverTrigger} from "@radix-ui/react-popover";
 import {cn} from "@/lib/utils";
 
@@ -44,6 +44,12 @@ const SPOT_LIST = [
 ];
 
 const Map = () => {
+  const [loading, setLoading] = React.useState(true);
+
+  const handleLoadedData = () => {
+    setLoading(false);
+  };
+
   return (
     <div className="w-[666px] h-[629px] relative">
       <Image src={konjiam} alt="map-konjiam" />
@@ -62,13 +68,24 @@ const Map = () => {
             <CameraLabel name={spot.name} disabled={!spot.isAvailable} />
           </PopoverTrigger>
           <PopoverContent
-            className={cn("flex justify-center items-center z-10 bg-black rounded-2xl p-5 m-2 w-80 h-50")}
+            className={cn("flex justify-center items-center z-10 bg-black rounded-2xl p-5 m-2 w-80 h-[200px]")}
           >
-            <video src={`/video/${spot.tag}.mov`} muted autoPlay loop />
+            {loading && (
+              <div className="flex justify-center items-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
+              </div>
+            )}
+            <video
+              src={`/video/${spot.tag}.mov`}
+              muted
+              autoPlay
+              loop
+              onLoadedData={handleLoadedData}
+              style={{display: loading ? "none" : "block"}}
+            />
           </PopoverContent>
         </Popover>
       ))}
-      {/* <video src="http://konjiam.live.cdn.cloudn.co.kr/konjiam/cam01.stream/playlist.m3u8" muted autoPlay /> */}
     </div>
   );
 };
